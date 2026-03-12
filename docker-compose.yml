@@ -6,9 +6,23 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${MSSQL_PW}
+      - MSSQL_AGENT_ENABLED=True
     ports:
       - "1433:1433"
     restart: always
+
+# 1b. SQL Server - Secondary (for Replication Testing)
+  mssql-secondary:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server_secondary
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_PW}
+      - MSSQL_AGENT_ENABLED=True
+    ports:
+      - "1434:1433"  # Different host port (1434) to avoid conflict
+    restart: always
+
 
   # 2. PostgreSQL (Matched to what just worked)
   postgres:
