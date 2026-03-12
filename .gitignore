@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+
+# Database storage
+postgres_data/
+mssql_data/
+oracle_data/
+duckdb/
+*.duckdb
+*.db
+
+
+# Python stuff
+__pycache__/
+.venv/
+.pytest_cache/

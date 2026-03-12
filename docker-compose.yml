@@ -1,0 +1,45 @@
+services:
+  # 1. SQL Server
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server_container
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_PW}
+    ports:
+      - "1433:1433"
+    restart: always
+
+  # 2. PostgreSQL (Matched to what just worked)
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+    ports:
+      - "5433:5432"  # Mapping 5433 (external) to 5432 (internal)
+    restart: always
+    # No volumes - running in pure memory mode for stability
+
+  # 3. Oracle
+  oracle:
+    image: gvenzl/oracle-free:23-slim
+    container_name: oracle_container
+    environment:
+      - ORACLE_PASSWORD=${ORACLE_PW}
+    ports:
+      - "1521:1521"
+    restart: always
+
+
+  # 4. MongoDB (NoSQL)
+  mongo:
+    image: mongo:latest
+    container_name: mongo_container
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PW}
+    ports:
+      - "27017:27017" # The standard Mongo port
+    restart: always
+    # Running without volumes for now (Volatile Mode) to guarantee a clean start
