@@ -1,5 +1,5 @@
 services:
-  # 1. SQL Server
+  # 1. SQL Server (Publisher)
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sql_server_container
@@ -10,8 +10,12 @@ services:
     ports:
       - "1433:1433"
     restart: always
+    volumes:
+      - replica-data:/var/opt/mssql/replica
+    networks:
+      - lab-net
 
-# 1b. SQL Server - Secondary (for Replication Testing)
+  # 1b. SQL Server (Subscriber)
   mssql-secondary:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sql_server_secondary
@@ -20,20 +24,24 @@ services:
       - MSSQL_SA_PASSWORD=${MSSQL_PW}
       - MSSQL_AGENT_ENABLED=True
     ports:
-      - "1434:1433"  # Different host port (1434) to avoid conflict
+      - "1434:1433"
     restart: always
+    volumes:
+      - replica-data:/var/opt/mssql/replica
+    networks:
+      - lab-net
 
-
-  # 2. PostgreSQL (Matched to what just worked)
+  # 2. PostgreSQL
   postgres:
     image: postgres:latest
     container_name: postgres_container
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PW}
     ports:
-      - "5433:5432"  # Mapping 5433 (external) to 5432 (internal)
+      - "5433:5432"
     restart: always
-    # No volumes - running in pure memory mode for stability
+    networks:
+      - lab-net
 
   # 3. Oracle
   oracle:
@@ -44,9 +52,10 @@ services:
     ports:
       - "1521:1521"
     restart: always
+    networks:
+      - lab-net
 
-
-  # 4. MongoDB (NoSQL)
+  # 4. MongoDB
   mongo:
     image: mongo:latest
     container_name: mongo_container
@@ -54,6 +63,15 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PW}
     ports:
-      - "27017:27017" # The standard Mongo port
+      - "27017:27017"
     restart: always
-    # Running without volumes for now (Volatile Mode) to guarantee a clean start
+    networks:
+      - lab-net
+
+# Infrastructure Definitions
+networks:
+  lab-net:
+    driver: bridge
+
+volumes:
+  replica-data:
