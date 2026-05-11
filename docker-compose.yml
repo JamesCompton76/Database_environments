@@ -68,6 +68,20 @@ services:
     networks:
       - lab-net
 
+  # 5. Spark (Delta Lake Engine)
+  spark:
+    image: apache/spark:3.5.1
+    container_name: spark_delta_engine
+    environment:
+      - SPARK_MODE=master
+    volumes:
+      - ./delta_warehouse:/opt/spark/work-dir # Apache uses a different internal path
+    ports:
+      - "8080:8080"
+      - "4040:4040"
+    networks:
+      - lab-net
+
 # Infrastructure Definitions
 networks:
   lab-net:
