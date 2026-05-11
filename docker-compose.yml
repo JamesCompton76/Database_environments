@@ -72,13 +72,16 @@ services:
   spark:
     image: apache/spark:3.5.1
     container_name: spark_delta_engine
+    # This keeps the container running as a Spark Master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
     environment:
       - SPARK_MODE=master
     volumes:
-      - ./delta_warehouse:/opt/spark/work-dir # Apache uses a different internal path
+      - ./delta_warehouse:/opt/spark/work-dir
     ports:
-      - "8080:8080"
-      - "4040:4040"
+      - "8080:8080" # Master Web UI
+      - "7077:7077" # Master Port for Spark Jobs
+      - "4040:4040" # Job UI
     networks:
       - lab-net
 
