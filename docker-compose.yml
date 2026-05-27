@@ -107,7 +107,7 @@ services:
       - lab-net
 
   # Infrastructure Definitions
-  networks:
+networks:
   lab-net:
     driver: bridge
 
