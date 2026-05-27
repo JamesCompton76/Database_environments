@@ -72,23 +72,45 @@ services:
   spark:
     image: apache/spark:3.5.1
     container_name: spark_delta_engine
-    # This keeps the container running as a Spark Master
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    user: root
+    # We use the full path to the entrypoint script which handles setup automatically
+    entrypoint: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
     environment:
-      - SPARK_MODE=master
+      - SPARK_NO_DAEMONIZE=true
+      # Add these two lines to tell the engine where to find Delta
+      - SPARK_JARS_PACKAGES=io.delta:delta-spark_2.12:3.1.0
+      - SPARK_CONF_spark_sql_extensions=io.delta.sql.DeltaSparkSessionExtension
+      - SPARK_CONF_spark_sql_catalog_spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
     volumes:
       - ./delta_warehouse:/opt/spark/work-dir
     ports:
-      - "8080:8080" # Master Web UI
-      - "7077:7077" # Master Port for Spark Jobs
-      - "4040:4040" # Job UI
+      - "8080:8080"
+      - "7077:7077"
     networks:
       - lab-net
 
-# Infrastructure Definitions
-networks:
+  # 6. MinIO (S3-Compatible Object Storage)
+  minio:
+    image: minio/minio:latest
+    container_name: minio_container
+    environment:
+      - MINIO_ROOT_USER=${MINIO_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_PW}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: always
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - lab-net
+
+  # Infrastructure Definitions
+  networks:
   lab-net:
     driver: bridge
 
 volumes:
   replica-data:
+  minio-data:
