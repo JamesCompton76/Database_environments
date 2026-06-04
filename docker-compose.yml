@@ -89,6 +89,20 @@ services:
     networks:
       - lab-net
 
+  # 5b. Spark Worker (Executes the actual compute)
+  spark-worker:
+    image: apache/spark:3.5.1
+    container_name: spark_worker
+    user: root
+    entrypoint: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker"]
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    command: spark://spark:7077
+    volumes:
+      - ./delta_warehouse:/opt/spark/work-dir
+    networks:
+      - lab-net
+
   # 6. MinIO (S3-Compatible Object Storage)
   minio:
     image: minio/minio:latest
